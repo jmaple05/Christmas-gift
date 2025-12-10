@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<head>
+    <title>Christmas Tree</title>
+    <style>
+        body {
+            background-color: rgb(217, 217, 217);
+        }
+        .tree {
+            font-family: monospace;
+            white-space: pre;
+            color: green
+        }
+        @keyframes blink {
+            0% {
+                opacity: 1; /* fully visible */
+            }
+            50% {
+                opacity: 0.3;
+            }
+            100% {
+                opacity: 1; /* fully transparent */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1 id="tree" class="tree"></h1>
+    <script>
+        const treeElement = document.getElementById("tree");
+        const height = 12;
+        let treeHTML = "";
+
+        const light_colors = [
+            "hsl(0,90%,60%)",       //red
+            "hsl(210,90%,60%)",     //blue
+            "hsl(0,0%,90%)",        //white
+            "hsl(50,100%,60%)",     //yellow
+            "hsl(140,80%,50%)"      //lighter green
+        ];
+
+        for (let i = 0; i < height; i++) {
+            const spaces = " ".repeat(height - 1 - i);
+            let star = spaces;
+            for (let j = 0; j < 2 * i + 1; j++) {
+                let color = "hsl(120,60%,25%)";
+                if (i == 0) {
+                    star += `<span style="color:hsl(60,100%,60%);">*</span>`
+                }
+                else if (Math.random() < 0.25) {
+                    color = light_colors[Math.floor(Math.random() * light_colors.length)];
+                    const speed = (Math.random() * 1 + 1.5).toFixed(2);
+                    const delay = (Math.random() * 1.4).toFixed(2);
+                    star += `<span style="
+                        color:${color}; 
+                        animation: blink ${speed}s infinite;
+                        animation-delay: ${delay}s;
+                    ">*</span>`;
+                }
+                else {
+                    star += `<span style="color:${color};">*</span>`
+                }
+            }
+            treeHTML += star + "\n";
+        }
+        
+        const trunkSpaces = " ".repeat(height-2);
+        const trunk = `<span style="color: rgb(87, 54, 9)">|||</span>`;
+        treeHTML += trunkSpaces + trunk + "\n";
+        treeHTML += trunkSpaces + trunk + "\n";
+
+
+        treeElement.innerHTML = treeHTML;
+    </script>
+    
+</body>
