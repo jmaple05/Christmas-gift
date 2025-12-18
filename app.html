@@ -1,75 +1,175 @@
 <!DOCTYPE html>
 <head>
-    <title>Christmas Tree</title>
+    <title>Christmas present from me to you</title>
     <style>
         body {
-            background-color: rgb(217, 217, 217);
+            background-color: rgb(15, 15, 15);
         }
         .tree {
             font-family: monospace;
             white-space: pre;
-            color: green
+            color: hsl(120,60%,25%);
         }
         @keyframes blink {
             0% {
-                opacity: 1; /* fully visible */
+                color: hsl(120,60%,25%);
             }
-            50% {
-                opacity: 0.3;
+            90% {
+                color: hsl(120,60%,25%);
+            }
+            95% {
+                color: var(--light);
             }
             100% {
-                opacity: 1; /* fully transparent */
+                color: hsl(120,60%,25%);
             }
+        }
+        @keyframes shouldBlink {
+            0%, 100% {
+                --blink-power: 1;
+            }
+            20%, 30% {
+                --blink-power: 0;
+            }
+
+        }
+        .star[style="--blink-power:0"] {
+            color: hsl(120,60%,25%);
+            animation: none;
+        }
+        .container{
+            display: flex;
+            align-items: flex-start;
+            gap: 50px;
+        }
+        .lyrics {
+            color: white;
+            font-family: arial;
+            font-size: 20px;
+            white-space: pre-wrap;
+            line-height: 40px;
+        }
+        .fade-char {
+            opacity: 0;
+            animation: fadeIn 1s forwards
+        }
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        .startBtn {
+            font-size: 30px;
         }
     </style>
 </head>
 <body>
-    <h1 id="tree" class="tree"></h1>
-    <script>
-        const treeElement = document.getElementById("tree");
-        const height = 12;
-        let treeHTML = "";
+    <div class="container">
+        <h1 id="tree" class="tree"></h1>
+        <h1 id="lyrics" class="lyrics"></h1>
+        <button id="startBtn" class="startBtn">Start Music</button>
+        <audio id="song" src="Mariah_Carey_-All_I_Want_For_Christmas_Is_You.mp3"></audio>
 
-        const light_colors = [
-            "hsl(0,90%,60%)",       //red
-            "hsl(210,90%,60%)",     //blue
-            "hsl(0,0%,90%)",        //white
-            "hsl(50,100%,60%)",     //yellow
-            "hsl(140,80%,50%)"      //lighter green
-        ];
+        <script>
+            const treeElement = document.getElementById("tree");
+            const height = 12;
+            let treeHTML = "";
 
-        for (let i = 0; i < height; i++) {
-            const spaces = " ".repeat(height - 1 - i);
-            let star = spaces;
-            for (let j = 0; j < 2 * i + 1; j++) {
-                let color = "hsl(120,60%,25%)";
-                if (i == 0) {
-                    star += `<span style="color:hsl(60,100%,60%);">*</span>`
+            const light_colors = [
+                "hsl(0,90%,60%)",       //red
+                "hsl(210,90%,60%)",     //blue
+                "hsl(0,0%,90%)",        //white
+                "hsl(50,100%,60%)",     //yellow
+                "hsl(140,80%,50%)"      //lighter green
+            ];
+
+            for (let i = 0; i < height; i++) {
+                const spaces = " ".repeat(height - 1 - i);
+                let star = spaces;
+                for (let j = 0; j < 2 * i + 1; j++) {
+                    let color = "hsl(120,60%,25%)";
+                    if (i == 0) {
+                        star += `<span style="color:hsl(60,100%,60%);">*</span>`
+                    }
+                    else {
+                        color = light_colors[Math.floor(Math.random() * light_colors.length)];
+                        const speed = (Math.random() * 1 + 2).toFixed(2);
+                        const delay = (Math.random() * 2).toFixed(2);
+                        star += `<span style="
+                            --light:${color}; 
+                            animation:  blink ${speed}s infinite,
+                                        shouldBlink ${(Math.random()*3+1).toFixed(2)}s infinite;
+                            animation-delay: ${delay}s;
+                        " class="star">*</span>`;
+                    }
                 }
-                else if (Math.random() < 0.25) {
-                    color = light_colors[Math.floor(Math.random() * light_colors.length)];
-                    const speed = (Math.random() * 1 + 1.5).toFixed(2);
-                    const delay = (Math.random() * 1.4).toFixed(2);
-                    star += `<span style="
-                        color:${color}; 
-                        animation: blink ${speed}s infinite;
-                        animation-delay: ${delay}s;
-                    ">*</span>`;
-                }
-                else {
-                    star += `<span style="color:${color};">*</span>`
-                }
+                treeHTML += star + "\n";
             }
-            treeHTML += star + "\n";
-        }
-        
-        const trunkSpaces = " ".repeat(height-2);
-        const trunk = `<span style="color: rgb(87, 54, 9)">|||</span>`;
-        treeHTML += trunkSpaces + trunk + "\n";
-        treeHTML += trunkSpaces + trunk + "\n";
+            
+            const trunkSpaces = " ".repeat(height-2);
+            const trunk = `<span style="color: rgb(87, 54, 9)">|||</span>`;
+            treeHTML += trunkSpaces + trunk + "\n";
+            treeHTML += trunkSpaces + trunk + "\n";
 
+            treeElement.innerHTML = treeHTML;
 
-        treeElement.innerHTML = treeHTML;
-    </script>
+            const lyricsTimeline = [
+                {time: 6.3, text: "I don't want a lot for Christmas", speed: 180},
+                {time: 12.8, text: "There is just one thing I need", speed: 100},
+                {time: 17.0, text: "I don't care about the presents", speed: 80},
+                {time: 21.0, text: "Underneath the Christmas tree", speed: 80},
+                {time: 24.1, text: "I just want you for my own", speed: 130},
+                {time: 28.2, text: "More than you could ever know", speed: 115},
+                {time: 33.5, text: "Make my wish come true", speed: 100},
+                {time: 39.0, text: "All I want for Christmas is you", speed: 240}
+            ];
+
+            function typeText(elementId, text, speed) {
+                const parent = document.getElementById(elementId);
+                
+                const line = document.createElement("div");
+                parent.appendChild(line);
+
+                let index = 0;
+
+                function typeNext() {
+                    if (index >= text.length) return;
+
+                    const span = document.createElement("span");
+                    span.textContent = text[index];
+                    span.classList.add("fade-char");
+                    line.appendChild(span);
+
+                    index++;
+                    setTimeout(typeNext, speed);
+                }
+                typeNext();
+            }
+
+            const audio = document.getElementById("song");
+            let currentLine = 0;
+
+            document.getElementById("startBtn").onclick = () => {
+                audio.play();
+                document.getElementById("startBtn").style.display = "none";
+            };
+
+            audio.ontimeupdate = () => {
+                if (currentLine >= lyricsTimeline.length) return;
+
+                const { time, text, speed } = lyricsTimeline[currentLine];
+
+                if (audio.currentTime >= time) {
+                    typeText("lyrics", text, speed);
+                    currentLine++;
+                }
+            };
+
+        </script>
+
+    </div>
     
 </body>
