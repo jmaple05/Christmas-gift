@@ -64,6 +64,23 @@
         .startBtn {
             font-size: 30px;
         }
+        #imageArea {
+            margin-top: 50px;
+            width: 400px;
+            height: 200px;
+            position: relative;
+        }
+        .song-image {
+            position: absolute;
+            width: 100%;
+            height: auto;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+        .song-image.show {
+            opacity: 1;
+            animation: fadeIn 1s;
+        }
     </style>
 </head>
 <body>
@@ -72,6 +89,7 @@
         <h1 id="lyrics" class="lyrics"></h1>
         <button id="startBtn" class="startBtn">Start Music</button>
         <audio id="song" src="Mariah_Carey_-All_I_Want_For_Christmas_Is_You.mp3"></audio>
+        <div id="imageArea"></div>
 
         <script>
             const treeElement = document.getElementById("tree");
@@ -116,6 +134,36 @@
 
             treeElement.innerHTML = treeHTML;
 
+            const pictures = [
+                {time: 12.8, image: "on_the_Y.jpg"},
+                {time: 17.0, image: "car_ride.jpg"},
+                {time: 21.0, image: "w_the_boyz.jpg"},
+                {time: 24.1, image: "fhe_dinner.jpg"},
+                {time: 28.2, image: "tree_of_life.jpg"},
+                {time: 33.5, image: "the_boys_mish_call.jpg"},
+                {time: 50.0, image: "lauren_mish_call.jpg"}
+            ];
+
+            function show_picture(image) {
+                const area = document.getElementById("imageArea");
+
+                const old = area.querySelector("img");
+                if (old) {
+                    old.classList.remove("show");
+                    setTimeout(() => old.remove(), 1000);
+                }
+
+                const img = document.createElement("img");
+                img.src = image;
+                img.className = "song-image";
+
+                area.appendChild(img);
+
+                requestAnimationFrame(() => {
+                    img.classList.add("show");
+                });
+            }
+
             const lyricsTimeline = [
                 {time: 6.3, text: "I don't want a lot for Christmas", speed: 180},
                 {time: 12.8, text: "There is just one thing I need", speed: 100},
@@ -124,7 +172,7 @@
                 {time: 24.1, text: "I just want you for my own", speed: 130},
                 {time: 28.2, text: "More than you could ever know", speed: 115},
                 {time: 33.5, text: "Make my wish come true", speed: 100},
-                {time: 39.0, text: "All I want for Christmas is you", speed: 240}
+                {time: 39.0, text: "All I want for Christmas is you", wordByWord: true, wordDelay: [900, 850, 650, 800, 3600, 4200]}
             ];
 
             function typeText(elementId, text, speed) {
@@ -149,8 +197,32 @@
                 typeNext();
             }
 
+            function typeWords(elementId, text, delay) {
+                const parent = document.getElementById(elementId);
+
+                const line = document.createElement("div");
+                parent.appendChild(line);
+
+                const words = text.split(" ");
+                let index = 0;
+
+                function showNextWord() {
+                    if (index >= words.length) return;
+
+                    const span = document.createElement("span");
+                    span.textContent = words[index] + " ";
+                    span.classList.add("fade-char");
+                    line.appendChild(span);
+
+                    index++;
+                    setTimeout(showNextWord, delay[index-1]);
+                }
+                showNextWord();
+            }
+
             const audio = document.getElementById("song");
             let currentLine = 0;
+            let currentPicture = 0;
 
             document.getElementById("startBtn").onclick = () => {
                 audio.play();
@@ -158,13 +230,23 @@
             };
 
             audio.ontimeupdate = () => {
-                if (currentLine >= lyricsTimeline.length) return;
+                const t = audio.currentTime;
 
-                const { time, text, speed } = lyricsTimeline[currentLine];
-
-                if (audio.currentTime >= time) {
-                    typeText("lyrics", text, speed);
+                while (currentLine < lyricsTimeline.length && t >= lyricsTimeline[currentLine].time) {
+                    if (lyricsTimeline[currentLine].wordByWord) {
+                        const { text, wordDelay } = lyricsTimeline[currentLine]
+                        typeWords("lyrics", text, wordDelay);
+                    }
+                    else {
+                        const { text, speed } = lyricsTimeline[currentLine];
+                        typeText("lyrics", text, speed);
+                    }
                     currentLine++;
+                }
+
+                if (currentPicture < pictures.length && t >= pictures[currentPicture].time) {
+                    show_picture(pictures[currentPicture].image);
+                    currentPicture++;
                 }
             };
 
