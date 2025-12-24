@@ -81,6 +81,36 @@
             opacity: 1;
             animation: fadeIn 1s;
         }
+        .merry-message {
+            position: fixed;
+            top: 40%;
+            left: 45%;
+            transform: translate(-40%, -50%);
+            color: white;
+            font-family: arial;
+            font-size: 60px;
+            opacity: 0;
+            transition: opacity 2s;
+            pointer-events: none;
+        }
+        .merry-message.show {
+            opacity: 1;
+        }
+        .love-message {
+            position: fixed;
+            top: 60%;
+            left: 50%;
+            transform: translate(-60%,-50%);
+            color: white;
+            font-family: arial;
+            font-size: 60px;
+            opacity: 0;
+            transition: opacity 2s;
+            pointer-events: none;
+        }
+        .love-message.show {
+            opacity: 1;
+        }
     </style>
 </head>
 <body>
@@ -90,6 +120,8 @@
         <button id="startBtn" class="startBtn">Start Music</button>
         <audio id="song" src="Mariah_Carey_-All_I_Want_For_Christmas_Is_You.mp3"></audio>
         <div id="imageArea"></div>
+        <div id="merry" class="merry-message">Merry Christmas 🎄</div>
+        <div id="love" class="love-message">I love you all!</div>
 
         <script>
             const treeElement = document.getElementById("tree");
@@ -172,7 +204,7 @@
                 {time: 24.1, text: "I just want you for my own", speed: 130},
                 {time: 28.2, text: "More than you could ever know", speed: 115},
                 {time: 33.5, text: "Make my wish come true", speed: 100},
-                {time: 39.0, text: "All I want for Christmas is you", wordByWord: true, wordDelay: [900, 850, 650, 800, 3600, 4200]}
+                {time: 39.0, text: "All I want for Christmas is you", wordByWord: true, wordDelay: [660, 770, 330, 560, 2850, 4040]}
             ];
 
             function typeText(elementId, text, speed) {
@@ -209,13 +241,34 @@
                 function showNextWord() {
                     if (index >= words.length) return;
 
-                    const span = document.createElement("span");
-                    span.textContent = words[index] + " ";
-                    span.classList.add("fade-char");
-                    line.appendChild(span);
+                    const wordContainer = document.createElement("span");
 
-                    index++;
-                    setTimeout(showNextWord, delay[index-1]);
+                    if (index > 0) {
+                        wordContainer.appendChild(document.createTextNode(" "));
+                    }
+                    line.appendChild(wordContainer);
+
+                    const letters = words[index].split("");
+                    let c = 0;
+
+                    function typeLetter() {
+                        if (c >= letters.length) {
+                            index++;
+                            setTimeout(showNextWord, delay[index-1]);
+                            return;
+                        }
+
+                        const charSpan = document.createElement("span");
+                        charSpan.textContent = letters[c];
+                        charSpan.classList.add("fade-char");
+                        wordContainer.appendChild(charSpan);
+
+                        c++;
+                        setTimeout(typeLetter, 80);
+                    }
+
+                    typeLetter();
+
                 }
                 showNextWord();
             }
@@ -228,6 +281,10 @@
                 audio.play();
                 document.getElementById("startBtn").style.display = "none";
             };
+
+            const fadeStart = 54.0;
+            const fadeDuration = 2500;
+            let fading = false;
 
             audio.ontimeupdate = () => {
                 const t = audio.currentTime;
@@ -244,9 +301,33 @@
                     currentLine++;
                 }
 
-                if (currentPicture < pictures.length && t >= pictures[currentPicture].time) {
+                while (currentPicture < pictures.length && t >= pictures[currentPicture].time) {
                     show_picture(pictures[currentPicture].image);
                     currentPicture++;
+                }
+
+                while (!fading && t >= fadeStart) {
+                    fading = true;
+
+                    let startVolume = audio.volume;
+                    const step = 100;
+                    const volumeStep = startVolume / (fadeDuration / step);
+
+                    const fade = setInterval(() => {
+                        if (audio.volume - volumeStep > 0) {
+                            audio.volume -= volumeStep;
+                        }
+                        else {
+                            audio.volume = 0;
+                            audio.pause();
+                            clearInterval(fade);
+
+                            document.getElementById("merry").classList.add("show");
+                            document.getElementById("love").classList.add("show");
+                            document.getElementById("imageArea").style.display = "none";
+                            document.getElementById("lyrics").style.display = "none";
+                        }
+                    }, step);
                 }
             };
 
